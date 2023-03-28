@@ -1,9 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "./components/sidebar";
-import Main from "./components/main";
-import { useState } from "react";
 import Modal from "react-modal/lib/components/Modal";
 import ModalPopUp from "./components/modal";
+import { Archive } from "./components/archive";
 
 // Function to convert time into a readable format.
 const convertTime = (time, options) => {
@@ -18,16 +17,7 @@ const convertTime = (time, options) => {
   });
 };
 
-const customStyles = {
-  content: {
-    top: '50%',
-    left: '50%',
-    right: 'auto',
-    bottom: 'auto',
-    marginRight: '-50%',
-    transform: 'translate(-50%, -50%)',
-  },
-};
+
 
 Modal.setAppElement('#root');
 
@@ -35,8 +25,7 @@ Modal.setAppElement('#root');
 function App() {
 
   const [notes, setNotes] = useState([]);
-
-  const [modalIsOpen, setIsOpen] = React.useState(false);
+  const [archivedNotes, setArchivedNotes] = useState([]);
 
   useEffect(() => {
     const storedNotes = JSON.parse(localStorage.getItem("notes"));
@@ -50,7 +39,7 @@ function App() {
       alert("You need to add some information");
     } else{
       const newNote = {
-        name: "Example Note",
+        name: "Example Note" + title,
         title: title,
         text: text,
         date: 'Created Date: ' + convertTime(Date.now()),
@@ -61,19 +50,31 @@ function App() {
     }
   };
 
-  const onDeleteNote = (index) => {
-    const newNote = [...notes];
+  const onUnarchiveNote = (index) => {
+    const newArchivedNotes = [...archivedNotes];
+    const noteToUnarchive = newArchivedNotes.splice(index, 1)[0];
+    setArchivedNotes(newArchivedNotes);
+    setNotes([...notes, noteToUnarchive]);
+    localStorage.setItem("archivedNotes", JSON.stringify(newArchivedNotes));
+    localStorage.setItem("notes", JSON.stringify([...notes, noteToUnarchive]));
+  };
+
+  const onArchiveNote = (index) => {
+    const newNotes = [...notes];
     if (window.confirm("Are you sure you want to delete this item?")) {
-      newNote.splice(index, 1);
-      setNotes(newNote);
-      localStorage.setItem("notes", JSON.stringify(newNote));
+      const noteToArchive = newNotes.splice(index, 1)[0];
+      setNotes(newNotes);
+      setArchivedNotes([...archivedNotes, noteToArchive]);
+      localStorage.setItem("notes", JSON.stringify(newNotes));
+      localStorage.setItem("archivedNotes", JSON.stringify(archivedNotes));
+      
     }
   };
 
   return (
     <div>
-      <Sidebar notes={notes} onAddNote={onAddNote} onDeleteNote={onDeleteNote} onOpen={<ModalPopUp/>} > </Sidebar>
-      <Main></Main>
+      <Sidebar notes={notes} onAddNote={onAddNote} onArchiveNote={onArchiveNote} onOpen={<ModalPopUp/>} > </Sidebar>
+      <Archive archivedNotes={archivedNotes} onArchiveNote={onArchiveNote} onUnarchiveNote={onUnarchiveNote}></Archive>
     </div>
   );
 }

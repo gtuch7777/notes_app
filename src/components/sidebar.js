@@ -7,8 +7,6 @@ const Sidebar = (props) => {
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
 
-  //   const [updated, setUpdated] = useState(title);
-  //   const [updated2, setUpdated2] = useState(message);
 
   const handleTitleChange = (event) => {
     setTitle(event.target.value);
@@ -77,7 +75,7 @@ const Sidebar = (props) => {
             />
             <button
               className="delete"
-              onClick={() => props.onDeleteNote(index)}
+              onClick={() => props.onArchiveNote(index)}
             >
               Delete
             </button>
